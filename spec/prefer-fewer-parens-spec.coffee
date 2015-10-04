@@ -36,7 +36,7 @@ describe 'PreferFewerParens', ->
       gulp.task 'compile', ->
         gulp.src(src)
           .pipe(coffee())
-          .pipe(gulp.dest('./src'))
+          .pipe gulp.dest('./src')
       """
       results = coffeelint.lint input, config
       expect(results.length).toEqual 0
@@ -76,8 +76,16 @@ describe 'PreferFewerParens', ->
       gulp.task('compile', ->
         gulp.src(src)
           .pipe(coffee())
-          .pipe(gulp.dest('./src'))
+          .pipe gulp.dest('./src')
       )
+      """
+      results = coffeelint.lint input, config
+      expect(results.length).toEqual 1
+
+    it 'rejects explicit parens usage in the last statement of a fn', ->
+      input = """
+      someFn: ->
+        thirdFn('arg1')
       """
       results = coffeelint.lint input, config
       expect(results.length).toEqual 1

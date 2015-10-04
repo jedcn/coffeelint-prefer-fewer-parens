@@ -7,7 +7,7 @@ closingParenWasExplicit = (token) ->
 
 closingParenAtEndOfLine = (api) ->
   next = api.peek 1
-  next[0] is 'TERMINATOR' and next[1] is '\n'
+  next[0] is 'OUTDENT' or (next[0] is 'TERMINATOR' and next[1] is '\n')
 
 class PreferFewerParens
   rule:
