@@ -11,28 +11,28 @@ describe 'PreferFewerParens', ->
 
   describe 'acceptable inputs', ->
 
-    it 'is ok with a fn invocation without args', ->
+    it 'allows parens in invocation with 0 args', ->
       input = """
       alert()
       """
       results = coffeelint.lint input, config
       expect(results.length).toEqual 0
 
-    it 'is ok with a basic fn invocation', ->
+    it 'allows implicit parens used with a single arg', ->
       input = """
       alert "Hello CoffeeScript!"
       """
       results = coffeelint.lint input, config
       expect(results.length).toEqual 0
 
-    it 'is ok with a basic method invocation', ->
+    it 'allows implicit parens used with two args', ->
       input = """
       Math.pow 2, 3
       """
       results = coffeelint.lint input, config
       expect(results.length).toEqual 0
 
-    it 'is ok with a fn invocation that takes a fn as an arg', ->
+    it 'allows implicit parens used with a function arg', ->
       input = '''
       runLater ->
         alert "Hello CoffeeScript!"
@@ -40,19 +40,23 @@ describe 'PreferFewerParens', ->
       results = coffeelint.lint input, config
       expect(results.length).toEqual 0
 
-    it 'is ok with mixed explicit/implicit paren usage', ->
+    it 'allows parens in all but last of chained function invocations', ->
       input = """
-      gulp.task 'compile', ->
-        gulp.src(src)
-          .pipe(coffee())
-          .pipe gulp.dest('./src')
+      gulp.src(src)
+        .pipe(coffee())
+        .pipe(gulp.dest('./src'))
       """
       results = coffeelint.lint input, config
-      expect(results.length).toEqual 0
+      expect(results.length).toEqual 1
+      result = results[0]
+      expect(result.rule).toEqual 'prefer_fewer_parens'
+      expect(result.lineNumber).toEqual 3
+      expect(result.line).toEqual "  .pipe(gulp.dest('./src'))"
+
 
   describe 'problematic inputs', ->
 
-    it 'rejects a fn invocation where unneeded parens are used', ->
+    it 'rejects unneeded parens with one arg', ->
       input = """
       alert("Hello CoffeeScript!")
       """
@@ -63,7 +67,7 @@ describe 'PreferFewerParens', ->
       expect(result.lineNumber).toEqual 1
       expect(result.line).toEqual 'alert("Hello CoffeeScript!")'
 
-    it 'rejects a method invocation where unneeded parens are used', ->
+    it 'rejects unneeded parens with two args', ->
       input = """
       Math.pow(2, 3)
       """
@@ -74,33 +78,76 @@ describe 'PreferFewerParens', ->
       expect(result.lineNumber).toEqual 1
       expect(result.line).toEqual 'Math.pow(2, 3)'
 
-    it 'rejects an invocation that takes a fn arg with unneeded parens', ->
+    it 'rejects unneeded parens used with a single function argument', ->
       input = '''
-      runLater(->
-        alert "Hello CoffeeScript!")
+      runLater(->)
       '''
       results = coffeelint.lint input, config
       expect(results.length).toEqual 1
       result = results[0]
       expect(result.rule).toEqual 'prefer_fewer_parens'
-      expect(result.lineNumber).toEqual 2
-      expect(result.line).toEqual '  alert "Hello CoffeeScript!")'
+      expect(result.lineNumber).toEqual 1
+      expect(result.line).toEqual 'runLater(->)'
 
-    it 'rejects mixed explicit/implict parens if last use is explicit', ->
-      input = """
-      gulp.task('compile', ->
-        gulp.src(src)
-          .pipe(coffee())
-          .pipe gulp.dest('./src')
+    it 'rejects unneeded parens outside and inside a function', ->
+      input = '''
+      runLater(->
+        alert("Hello CoffeeScript")
       )
-      """
+      '''
+
+      results = coffeelint.lint input, config
+      expect(results.length).toEqual 2
+
+      # inside
+      result = results[0]
+      expect(result.rule).toEqual 'prefer_fewer_parens'
+      expect(result.lineNumber).toEqual 2
+      expect(result.line).toEqual '  alert("Hello CoffeeScript")'
+
+      # outside
+      result = results[1]
+      expect(result.rule).toEqual 'prefer_fewer_parens'
+      expect(result.lineNumber).toEqual 3
+      expect(result.line).toEqual ')'
+
+    it 'rejects unneeded parens used inside a function', ->
+      input = '''
+      runLater ->
+        alert("Hello CoffeeScript")
+      '''
+
       results = coffeelint.lint input, config
       expect(results.length).toEqual 1
 
-    it 'rejects explicit parens usage in the last statement of a fn', ->
-      input = """
-      someFn: ->
-        thirdFn('arg1')
-      """
+      # inside
+      result = results[0]
+      expect(result.rule).toEqual 'prefer_fewer_parens'
+      expect(result.lineNumber).toEqual 2
+      expect(result.line).toEqual '  alert("Hello CoffeeScript")'
+
+    it 'rejects unneeded parens used anywhere inside a function', ->
+      input = '''
+      runLater ->
+        alert("First")
+        alert("Second")
+        alert("Third")
+      '''
+
       results = coffeelint.lint input, config
-      expect(results.length).toEqual 1
+      expect(results.length).toEqual 3
+
+      result = results[0]
+      expect(result.rule).toEqual 'prefer_fewer_parens'
+      expect(result.lineNumber).toEqual 2
+      expect(result.line).toEqual '  alert("First")'
+
+      result = results[1]
+      expect(result.rule).toEqual 'prefer_fewer_parens'
+      expect(result.lineNumber).toEqual 3
+      expect(result.line).toEqual '  alert("Second")'
+
+      result = results[2]
+      expect(result.rule).toEqual 'prefer_fewer_parens'
+      expect(result.lineNumber).toEqual 4
+      expect(result.line).toEqual '  alert("Third")'
