@@ -1,15 +1,26 @@
 {
   "name": "coffeelint-prefer-fewer-parens",
-  "version": "0.0.0",
-  "description": "Detects situations where you could use implicit parens",
+  "version": "0.1.0",
+  "description": "Detects situations where you *could have* avoided using parens",
   "scripts": {
     "lint": "coffeelint src/ spec/",
     "jasmine": "node jasmine-runner.js",
     "test": "npm run lint && npm run jasmine"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jedcn/coffeelint-prefer-fewer-parens"
+  },
   "keywords": [
-    "coffeelintrule"
+    "coffeelintrule",
+    "coffeelint"
   ],
+  "author": "jedcn",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jedcn/coffeelint-prefer-fewer-parens/issues"
+  },
+  "homepage": "https://github.com/jedcn/coffeelint-prefer-fewer-parens",
   "dependencies": {
     "coffee-script": "^1.10.0"
   },
