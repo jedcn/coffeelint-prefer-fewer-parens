@@ -1,4 +1,4 @@
-PreferFewerParens = require '../src/prefer-fewer-parens'
+PreferFewerParens = require '../index'
 
 coffeelint = require 'coffeelint'
 coffeelint.registerRule PreferFewerParens
