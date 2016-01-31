@@ -20,8 +20,8 @@ runLater(->
   gulp.fn(someArg)
       .pipe(anotherArg)
       .pipe(lastArg)
-
 )
+
 alert(1)
 alert(1, 2)
 ```
